@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Drawing App with Download Tool</title>
+  <style>
+    .toolbar-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #f2f2f2;
+      padding: 10px;
+      z-index: 9999; /* Adjust the z-index to make sure the toolbar is above other elements */
+    }
+    
+    .toolbar-right {
+      top: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+    
+    button {
+      padding: 10px 20px;
+      font-size: 25px;
+      color: white;
+      border: none;
+      border-radius: 1px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    
+    #red {
+      background-color: red; 
+    }
+    
+    #blue {
+      background-color: blue; 
+    }
+    
+    #green {
+      background-color: green; 
+    }
+    
+    #redpath {
+      background-color: red;
+    }
+    
+    #bluepath {
+      background-color: blue;
+    }
+    
+    #blackpath {
+      background-color: black; 
+    }
+    
+    #clearButton {
+      background-color: darkred; 
+    }
+    
+    #undoButton {
+      background-color: tomato; 
+    }
+    
+    #Info {
+      background-color: lime; 
+    }
+    
+    #colorAdd {
+      background-color: gray; 
+    }
+    
+    .toggle-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #e0e0e0; /* Light gray */
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .toggle-btn.active {
+      background-color: #a0a0a0; /* Darker gray */
+      opacity: 0.5;
+    }
+    
+    .toggle-btn:not(:last-child) {
+      margin-right: 10px;
+    }
+    
+    /* Hide the radio buttons */
+    input[type="radio"] {
+      display: none;
+    }
+    
+    #colorDisplay {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+      border-radius: 50%;
+      background-color: var(--path-color);
+      display: inline-block;
+      vertical-align: middle;
+      border: 2px solid #000;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    #colorInput {
+      width: 25px;
+      height: 25px;
+      border: none;
+      padding: 0;
+      background: none;
+      cursor: pointer;
+      appearance: none;
+      outline: none;
+    }
+    
+    #loadMap {
+      background-color: gray;
+    }
+    
+    #mapCode {
+      width: 150px;
+      height: 25px;
+    }
+    
+    #colorInput::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    
+    #colorInput::-webkit-color-swatch {
+      border: none;
+      border-radius: 50%;
+    }
+    
+    #colorInput::-moz-color-swatch {
+      border: none;
+      border-radius: 50%;
+    }
+    
+    #colorInput::-moz-focus-inner {
+      border: none;
+    }
+    
+    #colorName {
+      width: 100px;
+      height: 25px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .modal-textbox {
+      background-color: white;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+      font-size: 25px;
+    }
+    
+    .close-button {
+      background-color: #ccc;
+      border: none;
+      color: #000;
+      padding: 8px 16px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-top: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    .container {
+      display: flex;
+    }
+    
+    #canvas {
+      /* The main canvas */
+    }
+    
+    #invisibleCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: none;
+    }
+    
+    .misc {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start; /* Align sidebar elements to the left */
+    }
+    
+    .sidebar label,
+    .sidebar input,
+    .sidebar button {
+      margin: 5px 0; /* Add vertical spacing between the elements */
+      width: auto; /* Set width to auto for normal sizing */
+    }
+    
+    #open-form-button {
+      background-color: #f9e076;
+    }
+    
+    #greenpath {
+      background-color: green;
+    }
+    
+    #pinkpath {
+      background-color: pink;
+    }
+    
+    #yellowpath {
+      background-color: yellow;
+    }
+    
+    #purplepath {
+      background-color: purple;
+    }
+    
+    #orangepath {
+      background-color: orange;
+    }
+    
+    #graypath {
+      background-color: gray;
+    }
+    
+    #whitepath {
+      background-color: white;
+      color: black;
+      border: ridge;
+    }
+  </style>
+</head>
+<body>
+  <div class="files">
+    <label for="mapCode">Enter Map Code:</label>
+    <input type="text" id="mapCode" name="mapCode" required>
+    <button id="loadMap" onclick="loadMap()">Load Map</button> 
+  </div>
+  
+  <footer class="toolbar-bottom">
+    <button id="clearButton" onclick="clearCanvas()">Clear All</button>
+    <button id="undoButton" onclick="undo()">Undo</button>
+    <div id="colorDisplay"></div>
+    <div class="misc">
+      <button id="Info" onclick="openModal()">Info</button>
+      <button id="open-form-button">Open Suggestion Form</button>
+    </div>
+  </footer>
+  
+  <div class="container">
+    <canvas id="canvas" width="1000" height="760"></canvas>
+    <canvas id="invisibleCanvas"></canvas>
+    <div class="sidebar">
+      <!-- Tool selection radio buttons -->
+      <label for="noneCheckbox" class="toggle-btn">
+        <input type="radio" id="noneCheckbox" name="radioGroup" value="option1" checked>
+        None
+      </label>
+      <label for="drawCheckbox" class="toggle-btn">
+        <input type="radio" id="drawCheckbox" name="radioGroup" value="option2">
+        Draw 
+      </label>
+      <label for="lineCheckbox" class="toggle-btn">
+        <input type="radio" id="lineCheckbox" name="radioGroup" value="option3">
+        Line
+      </label>
+      <!-- NEW: Download tool radio button -->
+      <label for="downloadCheckbox" class="toggle-btn">
+        <input type="radio" id="downloadCheckbox" name="radioGroup" value="option4">
+        Download
+      </label>
+      
+      <!-- Other sidebar inputs -->
+      <label for="sizeInput">Size</label>
+      <input type="number" min="1" max="999" value="6" id="sizeInput" oninput="updatePathSize()">
+      <div>
+        <input type="text" value="Some Color" id="colorName">
+        <input type="color" id="colorInput" name="colorInput">
+      </div>    
+      <button id="colorAdd" onclick="colorAdd('colorInput')">Add Color</button>
+      <div id="colors">
+        <button id="redpath" onclick="updatePathColor('red')">Red</button> 
+        <button id="bluepath" onclick="updatePathColor('blue')">Blue</button>
+        <button id="greenpath" onclick="updatePathColor('green')">Green</button>
+        <button id="yellowpath" onclick="updatePathColor('yellow')">Yellow</button>
+        <button id="pinkpath" onclick="updatePathColor('pink')">Pink</button>
+        <button id="orangepath" onclick="updatePathColor('orange')">Orange</button>
+        <button id="purplepath" onclick="updatePathColor('purple')">Purple</button>
+        <button id="graypath" onclick="updatePathColor('gray')">Gray</button>
+        <button id="blackpath" onclick="updatePathColor('black')">Black</button>
+        <button id="whitepath" onclick="updatePathColor('white')">White</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-textbox">
+        <h2>Info</h2>
+        <p>Zoom out</p>
+        <p>Press N for none</p>
+        <p>Press D to draw</p>
+        <p>Press L for line</p>
+        <p>You Can Get The Map Code From <a href="https://fortunatemaps.herokuapp.com/">Fortunate Maps</a></p>
+        <p><a href="https://github.com/BambiTP/StraTAGy">Github</a></p>
+        <button class="close-button" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // === GLOBAL VARIABLES & CANVAS SETUP ===
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var canvasStates = [];
+    var pathSize = 6; // Default path size
+    var pathColor = "black"; // Default path color
+    var paths = []; // Array to store freehand and line paths
+    var isDrawing = false;
+    var gridSize = 10; // For line snapping (10x10)
+    
+    // NEW: Variable for download tool grid size (40x40)
+    var downloadGridSize = 40;
+    
+    // Load map background if mapCode is provided in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const mapCode = urlParams.get('mapCode');
+    if (mapCode) {
+      handleJPEGImage(mapCode);
+    }
+    // Default background image
+    canvas.style.backgroundImage = "url('74532.jpeg')";
+    
+    function handleJPEGImage(mapCode) {
+      var imageUrl = `https://fortunatemaps.herokuapp.com/preview/${mapCode}.jpeg`;
+      var img = new Image();
+      img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        canvas.style.backgroundImage = "url('" + img.src + "')";
+      };
+      img.src = imageUrl;
+    }
+    
+    // === DRAWING FUNCTIONS ===
+    function drawPaths() {
+      for (var i = 0; i < paths.length; i++) {
+        ctx.strokeStyle = paths[i].color; 
+        ctx.lineWidth = paths[i].size; 
+        ctx.stroke(paths[i].path);
+      }
+    }
+    
+    function drawCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPaths();
+    }
+    
+    function undo() {
+      if (paths.length > 0) {
+        paths.pop(); // Remove the last path
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPaths();
+      }
+    }
+    
+    // --- Freehand Drawing (active when "Draw" tool is selected) ---
+    function getStart(event) {
+      if (document.getElementById("downloadCheckbox").checked) return; // Skip in download mode
+      var path = {
+        path: new Path2D(),
+        color: pathColor,
+        size: pathSize
+      };
+      var rect = canvas.getBoundingClientRect();
+      path.path.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+      paths.push(path);
+    }
+    
+    function drawLineFreehand(event) {
+      if (document.getElementById("downloadCheckbox").checked) return;
+      var lastPath = paths[paths.length - 1];
+      var rect = canvas.getBoundingClientRect();
+      lastPath.path.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+      ctx.strokeStyle = lastPath.color;
+      ctx.lineWidth = lastPath.size;
+      ctx.stroke(lastPath.path);
+    }
+    
+    canvas.addEventListener("mousedown", function(event) {
+      if (document.getElementById("downloadCheckbox").checked) return; // Skip if download mode is active
+      if (event.button === 0 && document.getElementById("drawCheckbox").checked) {
+        isDrawing = true;
+      }
+      getStart(event);
+    });
+    
+    canvas.addEventListener("mousemove", function(event) {
+      // If download tool is active, handle highlighting of the 40x40 cell
+      if (document.getElementById("downloadCheckbox").checked) {
+        handleDownloadHighlight(event);
+        return;
+      }
+      if (isDrawing) drawLineFreehand(event);
+    });
+    
+    canvas.addEventListener("mouseup", function(event) {
+      if (document.getElementById("downloadCheckbox").checked) return;
+      isDrawing = false;
+    });
+    
+    // --- Line Drawing (active when "Line" tool is selected) ---
+    var isDrawingLine = false;
+    var lineStartX = 0;
+    var lineStartY = 0;
+    
+    function startDrawingLine(event) {
+      if (document.getElementById("downloadCheckbox").checked) return;
+      if (event.button === 0 && document.getElementById("lineCheckbox").checked) {
+        isDrawingLine = true;
+        var rect = canvas.getBoundingClientRect();
+        // Snap starting point to the 10x10 grid
+        lineStartX = Math.round((event.clientX - rect.left) / gridSize) * gridSize;
+        lineStartY = Math.round((event.clientY - rect.top) / gridSize) * gridSize;
+      }
+    }
+    
+    function drawLinePreview(event) {
+      if (document.getElementById("downloadCheckbox").checked) return;
+      if (isDrawingLine) {
+        var rect = canvas.getBoundingClientRect();
+        var lineEndX = Math.round((event.clientX - rect.left) / gridSize) * gridSize;
+        var lineEndY = Math.round((event.clientY - rect.top) / gridSize) * gridSize;
+    
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPaths();
+    
+        ctx.beginPath();
+        ctx.moveTo(lineStartX, lineStartY);
+        ctx.lineTo(lineEndX, lineEndY);
+        ctx.strokeStyle = pathColor;
+        ctx.lineWidth = pathSize;
+        ctx.stroke();
+      }
+    }
+    
+    function finishDrawingLine(event) {
+      if (document.getElementById("downloadCheckbox").checked) return;
+      if (isDrawingLine) {
+        isDrawingLine = false;
+        var rect = canvas.getBoundingClientRect();
+        var lineEndX = Math.round((event.clientX - rect.left) / gridSize) * gridSize;
+        var lineEndY = Math.round((event.clientY - rect.top) / gridSize) * gridSize;
+    
+        var path = {
+          path: new Path2D(),
+          color: pathColor,
+          size: pathSize
+        };
+        path.path.moveTo(lineStartX, lineStartY);
+        path.path.lineTo(lineEndX, lineEndY);
+        paths.push(path);
+    
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPaths();
+      }
+    }
+    
+    canvas.addEventListener("mousedown", startDrawingLine);
+    canvas.addEventListener("mousemove", drawLinePreview);
+    canvas.addEventListener("mouseup", finishDrawingLine);
+    
+    // --- Download Tool Functions ---
+    // When the download tool is active, hovering over the canvas will highlight a 40x40 square.
+    function handleDownloadHighlight(event) {
+      var rect = canvas.getBoundingClientRect();
+      var mouseX = event.clientX - rect.left;
+      var mouseY = event.clientY - rect.top;
+      // Snap the mouse position to the 40x40 grid cell
+      var cellX = Math.floor(mouseX / downloadGridSize) * downloadGridSize;
+      var cellY = Math.floor(mouseY / downloadGridSize) * downloadGridSize;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPaths(); // Redraw existing drawings/background
+      drawHighlight(cellX, cellY);
+    }
+    
+    // Draw a highlighted square (yellow outline) over the specified cell
+    function drawHighlight(x, y) {
+      ctx.save();
+      ctx.strokeStyle = "yellow";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, downloadGridSize, downloadGridSize);
+      ctx.restore();
+    }
+    
+    // When in download mode, a click on the canvas downloads the 40x40 section.
+    canvas.addEventListener("click", function(event) {
+      if (document.getElementById("downloadCheckbox").checked) {
+        var rect = canvas.getBoundingClientRect();
+        var mouseX = event.clientX - rect.left;
+        var mouseY = event.clientY - rect.top;
+        var cellX = Math.floor(mouseX / downloadGridSize) * downloadGridSize;
+        var cellY = Math.floor(mouseY / downloadGridSize) * downloadGridSize;
+        downloadSection(cellX, cellY);
+      }
+    });
+    
+    // Create an off-screen canvas to capture the 40x40 region and trigger a download.
+    function downloadSection(x, y) {
+      var tempCanvas = document.createElement('canvas');
+      tempCanvas.width = downloadGridSize;
+      tempCanvas.height = downloadGridSize;
+      var tempCtx = tempCanvas.getContext('2d');
+      // Copy the 40x40 region from the main canvas.
+      tempCtx.drawImage(canvas, x, y, downloadGridSize, downloadGridSize, 0, 0, downloadGridSize, downloadGridSize);
+      // Create a link and trigger a download.
+      var link = document.createElement('a');
+      link.download = 'section.png';
+      link.href = tempCanvas.toDataURL();
+      link.click();
+    }
+    
+    // --- Utility Functions ---
+    function updatePathSize() {
+      pathSize = Number(document.getElementById("sizeInput").value);
+    }
+    
+    function updatePathColor(color) {
+      pathColor = color;
+      document.documentElement.style.setProperty('--path-color', color);
+    }
+    
+    function colorAdd(colorInput) {
+      var colorInputElem = document.getElementById(colorInput);
+      var color = colorInputElem.value;
+      var colorName = document.getElementById("colorName");
+      var colorsDiv = document.getElementById("colors");
+      var colorButton = document.createElement("button");
+      colorButton.style.padding = "10px 20px";
+      colorButton.style.fontSize = "25px";
+      colorButton.style.color = "white";
+      colorButton.style.border = "none";
+      colorButton.style.borderRadius = "4px";
+      colorButton.style.cursor = "pointer";
+      colorButton.style.marginRight = "10px";
+      colorButton.style.backgroundColor = color;
+      colorButton.onclick = function() {
+        updatePathColor(color);
+      };
+      var buttonText = document.createTextNode(colorName.value);
+      colorButton.appendChild(buttonText);
+      colorsDiv.appendChild(colorButton);
+    }
+    
+    function loadMap() {
+      var mapCodeInput = document.getElementById('mapCode');
+      var mapCode = mapCodeInput.value;
+      handleJPEGImage(mapCode);
+    }
+    
+    // --- Keyboard Shortcuts for Tool Selection ---
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    toggleBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        toggleBtns.forEach((btn) => btn.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+    
+    document.addEventListener('keydown', function(event) {
+      const key = event.key.toLowerCase();
+      if (key === 'n') {
+        document.getElementById('noneCheckbox').checked = true;
+        toggleBtns.forEach((btn) => btn.classList.remove('active'));
+        document.querySelector('label[for="noneCheckbox"]').classList.add('active');
+      } else if (key === 'd') {
+        document.getElementById('drawCheckbox').checked = true;
+        toggleBtns.forEach((btn) => btn.classList.remove('active'));
+        document.querySelector('label[for="drawCheckbox"]').classList.add('active');
+      } else if (key === 'l') {
+        document.getElementById('lineCheckbox').checked = true;
+        toggleBtns.forEach((btn) => btn.classList.remove('active'));
+        document.querySelector('label[for="lineCheckbox"]').classList.add('active');
+      }
+    });
+    
+    // --- Modal Handling (if needed) ---
+    function openModal() {
+      document.getElementById("myModal").style.display = "block";
+    }
+    
+    function closeModal() {
+      document.getElementById("myModal").style.display = "none";
+    }
+    
+    // Optional: Clear canvas function (clears drawings but leaves the background image intact)
+    function clearCanvas() {
+      paths = [];
+      drawCanvas();
+    }
+  </script>
+</body>
+</html>
