@@ -364,16 +364,18 @@
     canvas.style.backgroundImage = "url('74532.jpeg')";
     
     function handleJPEGImage(mapCode) {
-      var imageUrl = `https://fortunatemaps.herokuapp.com/preview/${mapCode}.jpeg`;
-      var img = new Image();
-      img.onload = function() {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        canvas.style.backgroundImage = "url('" + img.src + "')";
-      };
-      img.src = imageUrl;
-    }
+  var imageUrl = `https://fortunatemaps.herokuapp.com/preview/${mapCode}.jpeg`;
+  var img = new Image();
+  img.crossOrigin = "anonymous"; // Enable CORS
+  img.onload = function() {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    canvas.style.backgroundImage = "url('" + img.src + "')";
+  };
+  img.src = imageUrl;
+}
+
     
     // === DRAWING FUNCTIONS ===
     function drawPaths() {
