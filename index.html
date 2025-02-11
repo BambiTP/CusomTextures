@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Drawing App with Download Tool</title>
+  <title>Custom Map Look</title>
   <style>
     .toolbar-bottom {
       position: fixed;
@@ -11,7 +11,7 @@
       width: 100%;
       background-color: #f2f2f2;
       padding: 10px;
-      z-index: 9999; /* Adjust the z-index to make sure the toolbar is above other elements */
+      z-index: 9999; /* Make sure the toolbar is above other elements */
     }
     
     .toolbar-right {
@@ -34,45 +34,16 @@
       margin-right: 10px;
     }
     
-    #red {
-      background-color: red; 
-    }
-    
-    #blue {
-      background-color: blue; 
-    }
-    
-    #green {
-      background-color: green; 
-    }
-    
-    #redpath {
-      background-color: red;
-    }
-    
-    #bluepath {
-      background-color: blue;
-    }
-    
-    #blackpath {
-      background-color: black; 
-    }
-    
-    #clearButton {
-      background-color: darkred; 
-    }
-    
-    #undoButton {
-      background-color: tomato; 
-    }
-    
-    #Info {
-      background-color: lime; 
-    }
-    
-    #colorAdd {
-      background-color: gray; 
-    }
+    #red { background-color: red; }
+    #blue { background-color: blue; }
+    #green { background-color: green; }
+    #redpath { background-color: red; }
+    #bluepath { background-color: blue; }
+    #blackpath { background-color: black; }
+    #clearButton { background-color: darkred; }
+    #undoButton { background-color: tomato; }
+    #Info { background-color: lime; }
+    #colorAdd { background-color: gray; }
     
     .toggle-btn {
       display: inline-block;
@@ -92,9 +63,7 @@
     }
     
     /* Hide the radio buttons */
-    input[type="radio"] {
-      display: none;
-    }
+    input[type="radio"] { display: none; }
     
     #colorDisplay {
       width: 50px;
@@ -119,42 +88,26 @@
       outline: none;
     }
     
-    #loadMap {
-      background-color: gray;
-    }
+    /* Map input now loads automatically on file select */
+    #mapFile { width: auto; }
     
-    #mapCode {
-      width: 150px;
-      height: 25px;
-    }
-    
-    #colorInput::-webkit-color-swatch-wrapper {
-      padding: 0;
-    }
-    
+    #colorInput::-webkit-color-swatch-wrapper { padding: 0; }
     #colorInput::-webkit-color-swatch {
       border: none;
       border-radius: 50%;
     }
-    
     #colorInput::-moz-color-swatch {
       border: none;
       border-radius: 50%;
     }
+    #colorInput::-moz-focus-inner { border: none; }
     
-    #colorInput::-moz-focus-inner {
-      border: none;
-    }
-    
-    #colorName {
-      width: 100px;
-      height: 25px;
-    }
+    #colorName { width: 100px; height: 25px; }
     
     .modal {
       display: none;
       position: fixed;
-      z-index: 9999;
+      z-index: 10000;
       top: 0;
       left: 0;
       width: 100%;
@@ -193,13 +146,9 @@
       border-radius: 4px;
     }
     
-    .container {
-      display: flex;
-    }
+    .container { display: flex; }
     
-    #canvas {
-      /* The main canvas */
-    }
+    #canvas { /* The main canvas */ }
     
     #invisibleCanvas {
       position: absolute;
@@ -208,11 +157,7 @@
       display: none;
     }
     
-    .misc {
-      position: absolute;
-      top: 0;
-      right: 0;
-    }
+    .misc { position: absolute; top: 0; right: 0; }
     
     .sidebar {
       display: flex;
@@ -223,50 +168,62 @@
     .sidebar label,
     .sidebar input,
     .sidebar button {
-      margin: 5px 0; /* Add vertical spacing between the elements */
-      width: auto; /* Set width to auto for normal sizing */
+      margin: 5px 0; /* Vertical spacing between elements */
+      width: auto;
     }
     
-    #open-form-button {
-      background-color: #f9e076;
+    /* Additional styling for the tile upload section */
+    #tileUploadSection {
+      margin-top: 10px;
+      padding: 5px;
+      border: 1px solid #ccc;
     }
     
-    #greenpath {
-      background-color: green;
+    /* Container for uploaded tile thumbnails */
+    #tileContainer {
+      margin-top: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      border: 1px dashed #aaa;
+      padding: 5px;
+      max-height: 200px;
+      overflow-y: auto;
     }
     
-    #pinkpath {
-      background-color: pink;
+    #tileContainer img {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
     }
     
-    #yellowpath {
-      background-color: yellow;
+    /* New button styling for downloading the sprite sheet */
+    #downloadSpriteSheet {
+      background-color: #4CAF50;
+      margin-top: 10px;
     }
     
-    #purplepath {
-      background-color: purple;
+    /* New button styling for exporting grid data */
+    #exportGridData {
+      background-color: #2196F3;
+      margin-top: 10px;
     }
     
-    #orangepath {
-      background-color: orange;
-    }
-    
-    #graypath {
-      background-color: gray;
-    }
-    
-    #whitepath {
-      background-color: white;
-      color: black;
-      border: ridge;
-    }
+    #open-form-button { background-color: #f9e076; }
+    #greenpath { background-color: green; }
+    #pinkpath { background-color: pink; }
+    #yellowpath { background-color: yellow; }
+    #purplepath { background-color: purple; }
+    #orangepath { background-color: orange; }
+    #graypath { background-color: gray; }
+    #whitepath { background-color: white; color: black; border: ridge; }
   </style>
 </head>
 <body>
   <div class="files">
-    <label for="mapCode">Enter Map Code:</label>
-    <input type="text" id="mapCode" name="mapCode" required>
-    <button id="loadMap" onclick="loadMap()">Load Map</button> 
+    <!-- Upload background map image; loads on input change -->
+    <label for="mapFile">Upload Map Image:</label>
+    <input type="file" id="mapFile" accept="image/*" onchange="loadMap()">
   </div>
   
   <footer class="toolbar-bottom">
@@ -296,13 +253,17 @@
         <input type="radio" id="lineCheckbox" name="radioGroup" value="option3">
         Line
       </label>
-      <!-- NEW: Download tool radio button -->
       <label for="downloadCheckbox" class="toggle-btn">
         <input type="radio" id="downloadCheckbox" name="radioGroup" value="option4">
-        Download
+        Download Tile
+      </label>
+      <!-- NEW: Tile tool radio button -->
+      <label for="tileCheckbox" class="toggle-btn">
+        <input type="radio" id="tileCheckbox" name="radioGroup" value="option5">
+        Tile
       </label>
       
-      <!-- Other sidebar inputs -->
+      <!-- Additional inputs (size, color, etc.) -->
       <label for="sizeInput">Size</label>
       <input type="number" min="1" max="999" value="6" id="sizeInput" oninput="updatePathSize()">
       <div>
@@ -322,9 +283,27 @@
         <button id="blackpath" onclick="updatePathColor('black')">Black</button>
         <button id="whitepath" onclick="updatePathColor('white')">White</button>
       </div>
+      
+      <!-- NEW: Tile image upload section; loads on input change -->
+      <div id="tileUploadSection">
+        <label for="tileFile">Upload Tile Image(s) (40×40):</label>
+        <input type="file" id="tileFile" accept="image/*" multiple onchange="loadTile()">
+      </div>
+      <!-- NEW: Tile container for easy access -->
+      <div id="tileContainer"></div>
+      <!-- NEW: Button to download the sprite sheet of uploaded tiles -->
+      <button id="downloadSpriteSheet" onclick="downloadSpriteSheet()">Download Sprite Sheet</button>
+      <!-- NEW: Container with Export Grid Data button, Map Name input, and Imgur Link input -->
+      <div id="exportContainer" style="display: flex; align-items: center; margin-top: 10px;">
+        <button id="exportGridData" onclick="openExportModal()">Export Grid Data</button>
+        <input type="text" id="mapName" placeholder="Map Name" style="margin-left: 10px;">
+        <!-- NEW: Imgur Link textbox -->
+        <input type="text" id="imgurLink" placeholder="Imgur Link" style="margin-left: 10px;">
+      </div>
     </div>
   </div>
   
+  <!-- Existing Info Modal -->
   <div id="myModal" class="modal">
     <div class="modal-content">
       <div class="modal-textbox">
@@ -333,9 +312,22 @@
         <p>Press N for none</p>
         <p>Press D to draw</p>
         <p>Press L for line</p>
-        <p>You Can Get The Map Code From <a href="https://fortunatemaps.herokuapp.com/">Fortunate Maps</a></p>
-        <p><a href="https://github.com/BambiTP/StraTAGy">Github</a></p>
+        <p>Upload Spiresheet to imgur</p>
+        <p>paste data into userscript on tagpro homepage<p>
+        <p><a heref="https://greasyfork.org/en/scripts/526517-tagpro-custom-map-tiles-anchored-pixi-overlay-editor">Userscript</a></p>
+        <p><a href="https://github.com/BambiTP/CusomTextures">Github</a></p>
         <button class="close-button" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- NEW: Export Grid Data Modal -->
+  <div id="exportModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-textbox" style="max-width: 350px; padding: 10px; font-size: 14px;">
+        <h3>Export Grid Data</h3>
+        <textarea id="exportText" style="width: 100%; height: 100px; font-size: 12px;"></textarea>
+        <button class="close-button" onclick="closeExportModal()">Close</button>
       </div>
     </div>
   </div>
@@ -344,64 +336,162 @@
     // === GLOBAL VARIABLES & CANVAS SETUP ===
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
-    var canvasStates = [];
     var pathSize = 6; // Default path size
     var pathColor = "black"; // Default path color
-    var paths = []; // Array to store freehand and line paths
+    var paths = []; // Array to store freehand and line paths (in pixel coordinates)
     var isDrawing = false;
-    var gridSize = 10; // For line snapping (10x10)
+    var gridSize = 10; // For snapping freehand drawing (if used)
     
-    // NEW: Variable for download tool grid size (40x40)
+    // NEW: Variable for download/tile tool grid size (40x40)
     var downloadGridSize = 40;
     
-    // Load map background if mapCode is provided in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const mapCode = urlParams.get('mapCode');
-    if (mapCode) {
-      handleJPEGImage(mapCode);
+    // NEW: Global variable to store the loaded background image.
+    var backgroundImg = null;
+    
+    // NEW: Global array to store uploaded tile images.
+    var tileLibrary = [];
+    // The currently active tile for placement.
+    var activeTile = null;
+    // For backward compatibility with tile placement code:
+    var tileImg = null;
+    
+    // NEW: Array to store placed tile objects (pixel coordinates).
+    var tilePlacements = [];
+    // NEW: Array to store grid tile data (grid coordinates + tileIndex).
+    var gridTiles = [];
+    
+    // NEW: Array to store grid lines (for the line tool).
+    var gridLines = [];
+    
+    // NEW: Unified history array to record all actions.
+    // Types: "path" (freehand drawing), "line" (line tool), "tile" (tile placement)
+    var actionHistory = [];
+    
+    // --- Image Upload & Map Loading ---
+    function loadMap() {
+      var fileInput = document.getElementById('mapFile');
+      if (fileInput.files && fileInput.files[0]) {
+        var file = fileInput.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            backgroundImg = img; // Store the background image
+            drawCanvas(); // Redraw the canvas with the background and any paths
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("Please select an image file.");
+      }
     }
-    // Default background image
-    canvas.style.backgroundImage = "url('74532.jpeg')";
     
-    function handleJPEGImage(mapCode) {
-  var imageUrl = `https://fortunatemaps.herokuapp.com/preview/${mapCode}.jpeg`;
-  var img = new Image();
-  img.crossOrigin = "anonymous"; // Enable CORS
-  img.onload = function() {
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-    canvas.style.backgroundImage = "url('" + img.src + "')";
-  };
-  img.src = imageUrl;
-}
-
+    // --- Tile Image Upload (Multiple Files) ---
+    function loadTile() {
+      var tileInput = document.getElementById('tileFile');
+      if (tileInput.files && tileInput.files.length > 0) {
+        for (let i = 0; i < tileInput.files.length; i++) {
+          let file = tileInput.files[i];
+          let reader = new FileReader();
+          reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+              tileLibrary.push(img);
+              if (!activeTile) {
+                activeTile = img;
+                tileImg = img;
+              }
+              updateTileContainer();
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      } else {
+        alert("Please select at least one tile image.");
+      }
+    }
     
-    // === DRAWING FUNCTIONS ===
+    // Update the tile container with thumbnails for each uploaded tile.
+    function updateTileContainer() {
+      var container = document.getElementById('tileContainer');
+      container.innerHTML = "";
+      tileLibrary.forEach(function(tile) {
+        var imgElem = document.createElement('img');
+        imgElem.src = tile.src;
+        imgElem.style.border = (tile === activeTile) ? "2px solid blue" : "none";
+        imgElem.addEventListener("click", function() {
+          activeTile = tile;
+          tileImg = tile;
+          var thumbnails = container.getElementsByTagName("img");
+          for (var j = 0; j < thumbnails.length; j++) {
+             thumbnails[j].style.border = "";
+          }
+          imgElem.style.border = "2px solid blue";
+        });
+        container.appendChild(imgElem);
+      });
+    }
+    
+    // --- DRAWING FUNCTIONS ---
+    function drawCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (backgroundImg) {
+        ctx.drawImage(backgroundImg, 0, 0);
+      }
+      drawPaths();
+      for (var i = 0; i < tilePlacements.length; i++) {
+        var tile = tilePlacements[i];
+        ctx.drawImage(tile.img, tile.x, tile.y, downloadGridSize, downloadGridSize);
+      }
+    }
+    
     function drawPaths() {
       for (var i = 0; i < paths.length; i++) {
-        ctx.strokeStyle = paths[i].color; 
-        ctx.lineWidth = paths[i].size; 
+        ctx.strokeStyle = paths[i].color;
+        ctx.lineWidth = paths[i].size;
         ctx.stroke(paths[i].path);
       }
     }
     
-    function drawCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawPaths();
-    }
-    
+    // --- Unified Undo Function ---
     function undo() {
-      if (paths.length > 0) {
-        paths.pop(); // Remove the last path
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawPaths();
+      if (actionHistory.length > 0) {
+        var lastAction = actionHistory.pop();
+        if (lastAction.type === "path") {
+          var idx = paths.indexOf(lastAction.item);
+          if (idx !== -1) {
+            paths.splice(idx, 1);
+          }
+        } else if (lastAction.type === "line") {
+          var idx = paths.indexOf(lastAction.item.pixelPath);
+          if (idx !== -1) {
+            paths.splice(idx, 1);
+          }
+          var gridIdx = gridLines.indexOf(lastAction.item.gridLine);
+          if (gridIdx !== -1) {
+            gridLines.splice(gridIdx, 1);
+          }
+        } else if (lastAction.type === "tile") {
+          var idx = tilePlacements.indexOf(lastAction.item.pixelTile);
+          if (idx !== -1) {
+            tilePlacements.splice(idx, 1);
+          }
+          var gridIdx = gridTiles.indexOf(lastAction.item.gridTile);
+          if (gridIdx !== -1) {
+            gridTiles.splice(gridIdx, 1);
+          }
+        }
+        drawCanvas();
       }
     }
     
-    // --- Freehand Drawing (active when "Draw" tool is selected) ---
+    // --- Freehand Drawing (Draw tool) ---
     function getStart(event) {
-      if (document.getElementById("downloadCheckbox").checked) return; // Skip in download mode
+      if (!document.getElementById("drawCheckbox").checked) return;
       var path = {
         path: new Path2D(),
         color: pathColor,
@@ -410,10 +500,11 @@
       var rect = canvas.getBoundingClientRect();
       path.path.moveTo(event.clientX - rect.left, event.clientY - rect.top);
       paths.push(path);
+      actionHistory.push({type: "path", item: path});
     }
     
     function drawLineFreehand(event) {
-      if (document.getElementById("downloadCheckbox").checked) return;
+      if (!document.getElementById("drawCheckbox").checked) return;
       var lastPath = paths[paths.length - 1];
       var rect = canvas.getBoundingClientRect();
       lastPath.path.lineTo(event.clientX - rect.left, event.clientY - rect.top);
@@ -423,52 +514,48 @@
     }
     
     canvas.addEventListener("mousedown", function(event) {
-      if (document.getElementById("downloadCheckbox").checked) return; // Skip if download mode is active
-      if (event.button === 0 && document.getElementById("drawCheckbox").checked) {
+      if (!document.getElementById("drawCheckbox").checked) return;
+      if (event.button === 0) {
         isDrawing = true;
+        getStart(event);
       }
-      getStart(event);
     });
     
     canvas.addEventListener("mousemove", function(event) {
-      // If download tool is active, handle highlighting of the 40x40 cell
-      if (document.getElementById("downloadCheckbox").checked) {
-        handleDownloadHighlight(event);
-        return;
-      }
+      if (!document.getElementById("drawCheckbox").checked) return;
       if (isDrawing) drawLineFreehand(event);
     });
     
     canvas.addEventListener("mouseup", function(event) {
-      if (document.getElementById("downloadCheckbox").checked) return;
+      if (!document.getElementById("drawCheckbox").checked) return;
       isDrawing = false;
     });
     
-    // --- Line Drawing (active when "Line" tool is selected) ---
+    // --- Line Drawing (Line tool) ---
     var isDrawingLine = false;
     var lineStartX = 0;
     var lineStartY = 0;
     
     function startDrawingLine(event) {
-      if (document.getElementById("downloadCheckbox").checked) return;
+      if (document.getElementById("downloadCheckbox").checked ||
+          document.getElementById("tileCheckbox").checked) return;
       if (event.button === 0 && document.getElementById("lineCheckbox").checked) {
         isDrawingLine = true;
         var rect = canvas.getBoundingClientRect();
-        // Snap starting point to the 10x10 grid
         lineStartX = Math.round((event.clientX - rect.left) / gridSize) * gridSize;
         lineStartY = Math.round((event.clientY - rect.top) / gridSize) * gridSize;
       }
     }
     
     function drawLinePreview(event) {
-      if (document.getElementById("downloadCheckbox").checked) return;
+      if (document.getElementById("downloadCheckbox").checked ||
+          document.getElementById("tileCheckbox").checked) return;
       if (isDrawingLine) {
         var rect = canvas.getBoundingClientRect();
         var lineEndX = Math.round((event.clientX - rect.left) / gridSize) * gridSize;
         var lineEndY = Math.round((event.clientY - rect.top) / gridSize) * gridSize;
     
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawPaths();
+        drawCanvas();
     
         ctx.beginPath();
         ctx.moveTo(lineStartX, lineStartY);
@@ -480,24 +567,36 @@
     }
     
     function finishDrawingLine(event) {
-      if (document.getElementById("downloadCheckbox").checked) return;
+      if (document.getElementById("downloadCheckbox").checked ||
+          document.getElementById("tileCheckbox").checked) return;
       if (isDrawingLine) {
         isDrawingLine = false;
         var rect = canvas.getBoundingClientRect();
         var lineEndX = Math.round((event.clientX - rect.left) / gridSize) * gridSize;
         var lineEndY = Math.round((event.clientY - rect.top) / gridSize) * gridSize;
     
-        var path = {
+        // Create the pixel path (for drawing)
+        var pixelPath = {
           path: new Path2D(),
           color: pathColor,
           size: pathSize
         };
-        path.path.moveTo(lineStartX, lineStartY);
-        path.path.lineTo(lineEndX, lineEndY);
-        paths.push(path);
+        pixelPath.path.moveTo(lineStartX, lineStartY);
+        pixelPath.path.lineTo(lineEndX, lineEndY);
+        paths.push(pixelPath);
     
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawPaths();
+        // Create the grid–line (using grid coordinates) and include the drawn color.
+        var gridLine = {
+          start: { x: lineStartX / downloadGridSize, y: lineStartY / downloadGridSize },
+          end: { x: lineEndX / downloadGridSize, y: lineEndY / downloadGridSize },
+          color: pathColor  // stores the color used when drawing the line
+        };
+        gridLines.push(gridLine);
+    
+        // Record one unified action for the line tool that includes both the pixel path and the grid data.
+        actionHistory.push({type: "line", item: { pixelPath: pixelPath, gridLine: gridLine }});
+    
+        drawCanvas();
       }
     }
     
@@ -505,21 +604,17 @@
     canvas.addEventListener("mousemove", drawLinePreview);
     canvas.addEventListener("mouseup", finishDrawingLine);
     
-    // --- Download Tool Functions ---
-    // When the download tool is active, hovering over the canvas will highlight a 40x40 square.
+    // --- Download & Tile Tool Functions ---
     function handleDownloadHighlight(event) {
       var rect = canvas.getBoundingClientRect();
       var mouseX = event.clientX - rect.left;
       var mouseY = event.clientY - rect.top;
-      // Snap the mouse position to the 40x40 grid cell
       var cellX = Math.floor(mouseX / downloadGridSize) * downloadGridSize;
       var cellY = Math.floor(mouseY / downloadGridSize) * downloadGridSize;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawPaths(); // Redraw existing drawings/background
+      drawCanvas();
       drawHighlight(cellX, cellY);
     }
     
-    // Draw a highlighted square (yellow outline) over the specified cell
     function drawHighlight(x, y) {
       ctx.save();
       ctx.strokeStyle = "yellow";
@@ -528,7 +623,7 @@
       ctx.restore();
     }
     
-    // When in download mode, a click on the canvas downloads the 40x40 section.
+    // When in download or tile mode, a click on the canvas performs a different action.
     canvas.addEventListener("click", function(event) {
       if (document.getElementById("downloadCheckbox").checked) {
         var rect = canvas.getBoundingClientRect();
@@ -538,20 +633,69 @@
         var cellY = Math.floor(mouseY / downloadGridSize) * downloadGridSize;
         downloadSection(cellX, cellY);
       }
+      else if (document.getElementById("tileCheckbox").checked) {
+        if (tileImg) {
+          var rect = canvas.getBoundingClientRect();
+          var mouseX = event.clientX - rect.left;
+          var mouseY = event.clientY - rect.top;
+          var tileX = Math.floor(mouseX / downloadGridSize) * downloadGridSize;
+          var tileY = Math.floor(mouseY / downloadGridSize) * downloadGridSize;
+          // Save pixel placement
+          var pixelTile = { img: tileImg, x: tileX, y: tileY };
+          tilePlacements.push(pixelTile);
+          // Determine the index of the active tile based on upload order
+          var tileIndex = tileLibrary.indexOf(tileImg);
+          // Create the grid–tile object including the tileIndex property
+          var gridTile = { 
+            x: tileX / downloadGridSize, 
+            y: tileY / downloadGridSize,
+            tileIndex: tileIndex
+          };
+          gridTiles.push(gridTile);
+          actionHistory.push({type: "tile", item: { pixelTile: pixelTile, gridTile: gridTile }});
+          drawCanvas();
+        }
+      }
     });
     
-    // Create an off-screen canvas to capture the 40x40 region and trigger a download.
     function downloadSection(x, y) {
+      drawCanvas();
       var tempCanvas = document.createElement('canvas');
       tempCanvas.width = downloadGridSize;
       tempCanvas.height = downloadGridSize;
       var tempCtx = tempCanvas.getContext('2d');
-      // Copy the 40x40 region from the main canvas.
       tempCtx.drawImage(canvas, x, y, downloadGridSize, downloadGridSize, 0, 0, downloadGridSize, downloadGridSize);
-      // Create a link and trigger a download.
       var link = document.createElement('a');
       link.download = 'section.png';
       link.href = tempCanvas.toDataURL();
+      link.click();
+    }
+    
+    // --- Sprite Sheet Download Function ---
+    // This function creates a sprite sheet of all uploaded tile images, with a maximum of 10 tiles per row.
+    function downloadSpriteSheet() {
+      var numTiles = tileLibrary.length;
+      if(numTiles === 0) {
+        alert("No tiles uploaded!");
+        return;
+      }
+      var columns = Math.min(10, numTiles);
+      var rows = Math.ceil(numTiles / 10);
+      var spriteCanvas = document.createElement("canvas");
+      spriteCanvas.width = columns * 40;
+      spriteCanvas.height = rows * 40;
+      var spriteCtx = spriteCanvas.getContext("2d");
+      
+      for (var i = 0; i < numTiles; i++) {
+        var tile = tileLibrary[i];
+        var x = (i % 10) * 40;
+        var y = Math.floor(i / 10) * 40;
+        spriteCtx.drawImage(tile, x, y, 40, 40);
+      }
+      
+      var link = document.createElement("a");
+      link.download = "sprite_sheet.png";
+      link.href = spriteCanvas.toDataURL("image/png");
       link.click();
     }
     
@@ -587,13 +731,7 @@
       colorsDiv.appendChild(colorButton);
     }
     
-    function loadMap() {
-      var mapCodeInput = document.getElementById('mapCode');
-      var mapCode = mapCodeInput.value;
-      handleJPEGImage(mapCode);
-    }
-    
-    // --- Keyboard Shortcuts for Tool Selection ---
+    // --- Keyboard Shortcuts for Tool Selection & Undo ---
     const toggleBtns = document.querySelectorAll('.toggle-btn');
     toggleBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -604,7 +742,10 @@
     
     document.addEventListener('keydown', function(event) {
       const key = event.key.toLowerCase();
-      if (key === 'n') {
+      if (event.ctrlKey && key === 'z') {
+        event.preventDefault();
+        undo();
+      } else if (key === 'n') {
         document.getElementById('noneCheckbox').checked = true;
         toggleBtns.forEach((btn) => btn.classList.remove('active'));
         document.querySelector('label[for="noneCheckbox"]').classList.add('active');
@@ -619,7 +760,7 @@
       }
     });
     
-    // --- Modal Handling (if needed) ---
+    // --- Modal Handling for Info ---
     function openModal() {
       document.getElementById("myModal").style.display = "block";
     }
@@ -628,9 +769,57 @@
       document.getElementById("myModal").style.display = "none";
     }
     
-    // Optional: Clear canvas function (clears drawings but leaves the background image intact)
+    // --- NEW: Modal Handling for Exporting Grid Data ---
+   function openExportModal() {
+    // Get the map name and Imgur link from input fields
+    var mapName = document.getElementById("mapName").value.trim() || "Unnamed Map";
+    var imgurLink = document.getElementById("imgurLink").value.trim();
+
+    // Prevent exporting if either is missing
+    if (!imgurLink || !mapName) {
+        alert("Please provide both a map name and an Imgur link.");
+        return;
+    }
+
+    // Ensure gridLines and gridTiles are properly defined before use
+    if (typeof gridLines === 'undefined' || typeof gridTiles === 'undefined') {
+        alert("Grid data is missing.");
+        return;
+    }
+
+    // Get modal and export text area
+    var exportModal = document.getElementById("exportModal");
+    var exportText = document.getElementById("exportText");
+
+    // Build export object
+    var exportData = { 
+        gridLines: gridLines, 
+        gridTiles: gridTiles,
+        imgurLink: imgurLink
+    };
+
+    var exportObject = {};
+    exportObject[mapName] = exportData;
+
+    // Convert to formatted JSON
+    exportText.value = JSON.stringify(exportObject, null, 2);
+
+    // Show modal
+    exportModal.style.display = "block";
+}
+
+    
+    function closeExportModal() {
+      document.getElementById("exportModal").style.display = "none";
+    }
+    
+    // Optional: Clear canvas function (clears drawings, tile placements, history, but leaves the background intact)
     function clearCanvas() {
       paths = [];
+      tilePlacements = [];
+      gridLines = [];
+      gridTiles = [];
+      actionHistory = [];
       drawCanvas();
     }
   </script>
